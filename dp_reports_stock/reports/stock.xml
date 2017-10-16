@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Sale Order Body -->
+        <template id="report_stockpicking_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
+                <div class="page">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <strong>
+                                <span t-esc="o.partner_id.name"/>
+                            </strong>
+                            <br/>
+                            <span t-esc="o.partner_id.street"/>
+                            <br/>
+                            <span t-esc="o.partner_id.zip"/>
+                            <span t-esc="o.partner_id.city"/>
+                            <br/>
+                            <span t-esc="o.partner_id.country_id.name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-offset-6 col-xs-6 text-right" style="padding-right:0;">
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="o.partner_id.ref">
+                                <span class="col-xs-6 text-left">Kundennr.:</span>
+                                <span class="col-xs-6" t-field="o.partner_id.ref"/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="o.partner_id.vat">
+                                <span class="col-xs-6 text-left">Ihre UID:</span>
+                                <span class="col-xs-6" t-field="o.partner_id.vat"/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="o.origin">
+                                <span class="col-xs-6 text-left">Ihre Referenz:</span>
+                                <span class="col-xs-6" t-field="o.origin"/>
+                            </div>
+                            <div t-if="o.state in ['draft','sent'] and o.date_order" class="col-xs-12"
+                                 style="padding-right:2px;">
+                                <span class="col-xs-6 text-left">Lieferdatum:</span>
+                                <span class="col-xs-6" t-field="o.min_date"
+                                      t-field-options='{"format": "dd.MM.yyyy"}'/>
+                            </div>
+                            <div t-if="o.state in ['draft','sent'] and o.date_order" class="col-xs-12"
+                                 style="padding-right:2px;">
+                                <span class="col-xs-6 text-left">Auftragsnummer:</span>
+                                <span class="col-xs-6" t-field="o.name"
+                                      t-field-options='{"format": "dd.MM.yyyy"}'/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row oe_mt32">
+                        <div class="col-xs-12 text-left">
+                            <h4>
+                                Lieferschein
+                                <span t-field="o.name"/>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <table class="oe_mt32 table table-condensed">
+                        <t t-set="art_number_is_set"
+                           t-value="field_set_in_lines(o.move_lines, 'product_id.default_code')"/>
+                        <!--<t t-set="lot_ids_is_set"-->
+                           <!--t-value="field_set_in_lines(o, 'pack_operation_product_ids.pack_lot_ids')"/>-->
+                        <thead>
+                            <tr>
+                                <th class="text-center">Pos</th>
+                                <th class="text-center" t-if="art_number_is_set">Art-Nr.</th>
+                                <th class="text-left">Bezeichnung</th>
+                                <th class="text-center">Menge</th>
+                                <!--<th class="text-right" t-if="lot_ids_is_set">Fertigungslos</th>-->
+                            </tr>
+                        </thead>
+                        <tbody class="">
+                            <t t-set="pos_nr" t-value="0"/>
+                            <tr t-foreach="o.move_lines" t-as="move_line">
+                                <t t-set="pos_nr" t-value="pos_nr+1"/>
+                                <td class="text-center">
+                                    <span t-esc="pos_nr"/>
+                                </td>
+                                <td class="text-center" t-if="art_number_is_set">
+                                    <span t-field="move_line.product_id.default_code"/>
+                                </td>
+                                <td class="text-left">
+                                    <span t-field="move_line.name"/>
+                                </td>
+                                <td class="text-center">
+                                    <span t-field="move_line.product_uom_qty"/>
+                                </td>
+                                <!--<td class="text-right" t-if="lot_ids_is_set">-->
+                                    <!--<t t-foreach="o.pack_operation_product_ids.pack_lot_ids" t-as="pack_lot">-->
+                                        <!--<div class="co-xs-12" t-field="pack_lot.lot_id.name"/>-->
+                                    <!--</t>-->
+                                <!--</td>-->
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <p class="col-xs-12">
+                            <span t-field="o.note"/>
+                        </p>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="stock.report_deliveryslip">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="dp_reports_stock.report_stockpicking_document" t-lang="o.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+
+    <record id="stock.action_report_delivery" model="ir.actions.report">
+        <field name="paperformat_id" ref="dp_reports.paperformat_a4_european"/>
+    </record>
+</odoo>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_purchaseorder_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
+                <div class="page">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <strong>
+                                <span t-esc="o.partner_id.name"/>
+                            </strong>
+                            <br/>
+                            <span t-esc="o.partner_id.street"/>
+                            <br/>
+                            <span t-esc="o.partner_id.zip"/>
+                            <span t-esc="o.partner_id.city"/>
+                            <br/>
+                            <span t-esc="o.partner_id.country_id.name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-offset-6 col-xs-6 text-right" style="padding-right:0;">
+                            <div t-if="o.state not in ['draft','sent', 'bid', 'confirmed'] and o.date_order"
+                                 class="col-xs-12"
+                                 style="padding-right:2px;">
+                                <span class="col-xs-6 text-left">Bestelldatum:</span>
+                                <span class="col-xs-6" t-field="o.date_order"
+                                      t-field-options='{"format": "dd.MM.yyyy"}'/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="o.partner_ref">
+                                <span class="col-xs-6 text-left">Lieferantenreferenz:</span>
+                                <span class="col-xs-6" t-field="o.partner_ref"/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="o.date_planned">
+                                <span class="col-xs-6 text-left">Geplantes Lieferdatum:</span>
+                                <span class="col-xs-6" t-field="o.date_planned"
+                                      t-field-options='{"format": "dd.MM.yyyy"}'/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;" t-if="user.partner_id">
+                                <span class="col-xs-6 text-left">Ansprechpartner:</span>
+                                <span class="col-xs-6" t-field="user.partner_id"/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;"
+                                 t-if="user.partner_id and  user.partner_id.email">
+                                <span class="col-xs-6 text-left">Email:</span>
+                                <span class="col-xs-6" t-field="user.partner_id.email"/>
+                            </div>
+                            <div class="col-xs-12" style="padding-right:2px;"
+                                 t-if="user.partner_id and user.partner_id.phone">
+                                <span class="col-xs-6 text-left">Telefon:</span>
+                                <span class="col-xs-6" t-field="user.partner_id.phone"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row oe_mt32">
+                        <div class="col-xs-12 text-left">
+                            <h4>
+                                <t t-if="o.state != 'draft'">Bestellbestätigung #
+                                    <span t-field="o.name"/>
+                                </t>
+                                <t t-if="o.state == 'draft'">Angebotsanfrage #
+                                    <span t-field="o.name"/>
+                                </t>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <table class="oe_mt32 table table-condensed">
+                        <t t-set="art_number_is_set"
+                           t-value="field_set_in_lines(o.order_line, 'product_id.default_code')"/>
+                        <thead>
+                            <tr>
+                                <th class="text-center">Pos</th>
+                                <th class="text-center" t-if="art_number_is_set">Art-Nr.</th>
+                                <th class="text-left">Bezeichnung</th>
+                                <th class="text-center">Menge</th>
+                                <th class="text-right">Einzelpreis</th>
+                                <th class="text-right">Gesamtpreis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="pos_nr" t-value="0"/>
+                            <tr t-foreach="o.order_line" t-as="order_line">
+                                <t t-set="pos_nr" t-value="pos_nr+1"/>
+                                <td class="text-center">
+                                    <span t-esc="pos_nr"/>
+                                </td>
+                                <td class="text-center" t-if="art_number_is_set">
+                                    <span t-field="order_line.product_id.default_code"/>
+                                </td>
+                                <td class="text-left">
+                                    <span t-field="order_line.name"/>
+                                </td>
+                                <td class="text-center">
+                                    <span t-field="order_line.product_qty"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="order_line.price_unit"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="order_line.price_subtotal"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+
+                        <div class="oe_mt32 col-xs-4 pull-right">
+                            <table class="table table-condensed">
+                                <tr class="border-black">
+                                    <td>
+                                        <strong>Zwischensumme</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_untaxed"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>MwSt.</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_tax"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr class="border-black">
+                                    <td>
+                                        <strong>Gesamtsumme</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_total"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <p class="col-xs-12">
+                            <span t-field="o.notes"/>
+                        </p>
+                        <p class="col-xs-12">
+                            <t t-if="o.incoterm_id.name">
+                                Lieferbedingung:
+                                <t t-esc="o.incoterm_id.name"/>
+                                <br/>
+                            </t>
+                        </p>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="purchase.report_purchaseorder">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="dp_reports_purchase.report_purchaseorder_document" t-lang="o.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+
+    <record id="purchase.action_report_purchase_order" model="ir.actions.report">
+        <field name="paperformat_id" ref="dp_reports.paperformat_a4_european"/>
+    </record>
+</odoo>
