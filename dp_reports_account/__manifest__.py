@@ -10,6 +10,7 @@
     'author': 'datenpol gmbh',
     'website': 'http://www.datenpol.at/',
     'depends': [
+	'dp_reports',
         'account_invoicing'
     ],
     'data': [
