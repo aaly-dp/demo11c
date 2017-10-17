@@ -1,4 +1,0 @@
-[submodule "OCA/server-tools/ir_config_parameter_viewer"]
-	path = OCA/server-tools/ir_config_parameter_viewer
-	url = git@github.com:OCA/server-tools.git
-	branch = 10.0
